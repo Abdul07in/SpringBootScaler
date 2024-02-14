@@ -4,11 +4,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-public class CreateTaskDTO {
+public class CreateNoteDTO {
     String title;
-    String description;
-    String deadline;
+    String body;
 }

@@ -2,13 +2,15 @@ package com.scaler.taskmanger.controllers;
 
 import com.scaler.taskmanger.dto.CreateTaskDTO;
 import com.scaler.taskmanger.dto.ErrorResponseDTO;
+import com.scaler.taskmanger.dto.TaskResponseDTO;
 import com.scaler.taskmanger.dto.UpdateTaskDTO;
 import com.scaler.taskmanger.entities.TaskEntity;
+import com.scaler.taskmanger.service.NoteService;
 import com.scaler.taskmanger.service.TaskService;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.util.List;
 
@@ -16,9 +18,12 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final NoteService noteService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, NoteService noteService) {
         this.taskService = taskService;
+        this.noteService = noteService;
     }
 
     @GetMapping("/")
@@ -28,12 +33,15 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskEntity> getTaskById(@PathVariable("id") Integer id) {
+    public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable("id") Integer id) {
         var task = taskService.getTaskById(id);
+        var notes = noteService.getNotesByTaskId(id);
         if (task == null) {
             return ResponseEntity.notFound().build(); // Task found.
         }
-        return ResponseEntity.ok(task); // Task not found.
+        var taskDTO = modelMapper.map(task, TaskResponseDTO.class);
+        taskDTO.setNotes(notes);
+        return ResponseEntity.ok(taskDTO); // Task not found.
     }
 
     @PostMapping("/")
